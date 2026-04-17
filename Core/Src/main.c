@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -25,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "com_debug.h"
 #include "app_freertos_task.h"
+#include "per_SI24R1.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -89,8 +91,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  DEBUG_PRINTF("Hello World! 你好，世界！\n");
+  DEBUG_PRINTF("Hello remote!\n");
+
+  per_SI24R1_Init(); // 初始化SI24R1
 
   // 启动FreeRTOS，
   app_freertos_start();
