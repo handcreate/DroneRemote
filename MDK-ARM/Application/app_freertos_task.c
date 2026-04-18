@@ -2,6 +2,7 @@
 #include "com_debug.h"
 #include "per_tp4336.h"
 #include "per_SI24R1.h"
+#include "per_key.h"
 
 // 测试任务
 void test_task( void *args );
@@ -27,6 +28,14 @@ void comm_task( void *args );
 #define COMM_TASK_PERIOD 6
 TaskHandle_t comm_task_handle;
 
+// 按键任务
+void key_task( void *args );
+#define KEY_TASK_STACK_SIZE 128
+#define KEY_TASK_PRIORITY 2
+#define KEY_TASK_NAME "key_task"
+#define KEY_TASK_PERIOD 10
+TaskHandle_t key_task_handle;
+
 void app_freertos_start(void)
 {
     // xTaskCreate(test_task, 
@@ -49,6 +58,13 @@ void app_freertos_start(void)
         NULL, 
         COMM_TASK_PRIORITY, 
         &comm_task_handle);
+
+    xTaskCreate(key_task, 
+        KEY_TASK_NAME, 
+        KEY_TASK_STACK_SIZE, 
+        NULL, 
+        KEY_TASK_PRIORITY, 
+        &key_task_handle);
 
     vTaskStartScheduler();
 }
@@ -87,7 +103,7 @@ void comm_task( void *args )
         
         per_SI24R1_TX_Mode();
         uint8_t res = per_SI24R1_TxPacket(comm_buffer);
-        DEBUG_PRINTF("SEND: %s\r\n", res == 0 ? "SUCCESS" : "FAILED");
+        // DEBUG_PRINTF("SEND: %s\r\n", res == 0 ? "SUCCESS" : "FAILED");
         per_SI24R1_RX_Mode();
 
         // res = per_SI24R1_RxPacket(comm_buffer);
@@ -107,4 +123,18 @@ void comm_task( void *args )
 
     //     vTaskDelayUntil(&xLastWakeTime, COMM_TASK_PERIOD);
     // }
+}
+
+void key_task( void *args )
+{
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    while (1)
+    {
+        KeyType key = per_key_get();
+        if(key != KEY_NONE)
+        {
+            DEBUG_PRINTF("KEY: %d\r\n", key);
+        }
+        vTaskDelayUntil(&xLastWakeTime, KEY_TASK_PERIOD);
+    }
 }
