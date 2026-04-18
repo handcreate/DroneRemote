@@ -3,6 +3,10 @@
 #include "per_tp4336.h"
 #include "per_SI24R1.h"
 #include "per_key.h"
+#include "per_joystick.h"
+
+// 摇杆数据结构体 (volatile保证多任务间正确读取)
+volatile JoystickStruct joystick = {0, 0, 0, 0};
 
 // 测试任务
 void test_task( void *args );
@@ -33,8 +37,16 @@ void key_task( void *args );
 #define KEY_TASK_STACK_SIZE 128
 #define KEY_TASK_PRIORITY 2
 #define KEY_TASK_NAME "key_task"
-#define KEY_TASK_PERIOD 10
+#define KEY_TASK_PERIOD 20
 TaskHandle_t key_task_handle;
+
+// 摇杆任务
+void joy_task( void *args );
+#define JOY_TASK_STACK_SIZE 128
+#define JOY_TASK_PRIORITY 5  // 摇杆优先级高于通讯，保证实时性
+#define JOY_TASK_NAME "joy_task"
+#define JOY_TASK_PERIOD 20
+TaskHandle_t joy_task_handle;
 
 void app_freertos_start(void)
 {
@@ -65,6 +77,13 @@ void app_freertos_start(void)
         NULL, 
         KEY_TASK_PRIORITY, 
         &key_task_handle);
+
+    xTaskCreate(joy_task, 
+        JOY_TASK_NAME, 
+        JOY_TASK_STACK_SIZE, 
+        NULL, 
+        JOY_TASK_PRIORITY, 
+        &joy_task_handle);
 
     vTaskStartScheduler();
 }
@@ -136,5 +155,20 @@ void key_task( void *args )
             DEBUG_PRINTF("KEY: %d\r\n", key);
         }
         vTaskDelayUntil(&xLastWakeTime, KEY_TASK_PERIOD);
+    }
+}
+
+void joy_task( void *args )
+{
+    // ADC DMA只需初始化一次，不能在循环中重复调用
+    per_joystick_init();
+
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    while (1)
+    {
+        per_joystick_get((JoystickStruct *)&joystick);
+        DEBUG_PRINTF("thr: %d, yaw: %d, pit: %d, rol: %d\n",
+            joystick.thr, joystick.yaw, joystick.pit, joystick.rol);
+        vTaskDelayUntil(&xLastWakeTime, JOY_TASK_PERIOD);
     }
 }
