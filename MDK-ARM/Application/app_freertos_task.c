@@ -2,11 +2,7 @@
 #include "com_debug.h"
 #include "per_tp4336.h"
 #include "per_SI24R1.h"
-#include "per_key.h"
-#include "per_joystick.h"
-
-// 摇杆数据结构体 (volatile保证多任务间正确读取)
-volatile JoystickStruct joystick = {0, 0, 0, 0};
+#include "app_data_process.h"
 
 // 测试任务
 void test_task( void *args );
@@ -149,11 +145,7 @@ void key_task( void *args )
     TickType_t xLastWakeTime = xTaskGetTickCount();
     while (1)
     {
-        KeyType key = per_key_get();
-        if(key != KEY_NONE)
-        {
-            DEBUG_PRINTF("KEY: %d\r\n", key);
-        }
+        app_process_key_data();
         vTaskDelayUntil(&xLastWakeTime, KEY_TASK_PERIOD);
     }
 }
@@ -166,9 +158,7 @@ void joy_task( void *args )
     TickType_t xLastWakeTime = xTaskGetTickCount();
     while (1)
     {
-        per_joystick_get((JoystickStruct *)&joystick);
-        DEBUG_PRINTF("thr: %d, yaw: %d, pit: %d, rol: %d\n",
-            joystick.thr, joystick.yaw, joystick.pit, joystick.rol);
+        app_process_joystick_data();
         vTaskDelayUntil(&xLastWakeTime, JOY_TASK_PERIOD);
     }
 }

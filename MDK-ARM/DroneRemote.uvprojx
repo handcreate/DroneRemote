@@ -844,6 +844,16 @@
               <FileType>5</FileType>
               <FilePath>.\Common\com_debug.h</FilePath>
             </File>
+            <File>
+              <FileName>com_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Common\com_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>com_utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Common\com_utils.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1013,6 +1023,16 @@
               <FileName>app_freertos_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Application\app_freertos_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_data_process.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Application\app_data_process.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_data_process.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Application\app_data_process.h</FilePath>
             </File>
           </Files>
         </Group>
