@@ -1,8 +1,8 @@
 #include "app_freertos_task.h"
 #include "com_debug.h"
 #include "per_tp4336.h"
-#include "per_SI24R1.h"
 #include "app_data_process.h"
+#include "app_data_transmit.h"
 
 // 测试任务
 void test_task( void *args );
@@ -103,41 +103,14 @@ void power_task( void *args )
     }
 }
 
-uint8_t comm_buffer[TX_PLOAD_WIDTH] = {0};
-
 void comm_task( void *args )
 {
     TickType_t xLastWakeTime = xTaskGetTickCount();
     while (1)
     {
-        comm_buffer[0] = 'H';
-        comm_buffer[1] = 'E';
-        comm_buffer[2] = 'L';
-        comm_buffer[3] = 'L';
-        comm_buffer[4] = 'O';
-        
-        per_SI24R1_TX_Mode();
-        uint8_t res = per_SI24R1_TxPacket(comm_buffer);
-        // DEBUG_PRINTF("SEND: %s\r\n", res == 0 ? "SUCCESS" : "FAILED");
-        per_SI24R1_RX_Mode();
-
-        // res = per_SI24R1_RxPacket(comm_buffer);
-        // DEBUG_PRINTF("RECEIVE: %s\r\n", res == 0 ? "SUCCESS" : "FAILED");
-
+        app_transmit_data();
         vTaskDelayUntil(&xLastWakeTime, COMM_TASK_PERIOD);
     }
-
-    // TickType_t xLastWakeTime = xTaskGetTickCount();
-    // while (1)
-    // {
-    //     uint8_t res = per_SI24R1_RxPacket(comm_buffer);
-    //     if(res == 0)
-    //     {
-    //         DEBUG_PRINTF("RECEIVE: %s\r\n", comm_buffer);
-    //     }
-
-    //     vTaskDelayUntil(&xLastWakeTime, COMM_TASK_PERIOD);
-    // }
 }
 
 void key_task( void *args )
